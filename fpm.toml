@@ -1,0 +1,21 @@
+name       = "dynload-julia"
+description= "Dynamically load Julia from Fortran"
+version    = "0.1.0"
+license    = "MIT"
+author     = "Carlos Une"
+copyright  = "2021 Carlos Une"
+maintainer = "Carlos Une <@brocolis>"
+homepage   = "https://github.com/brocolis/dynload-julia"
+categories = ["dynamic loader"]
+keywords   = ["julia"]
+
+[build]
+auto-executables = true
+auto-tests = true
+auto-examples = true
+
+[dependencies]
+dynload-base = { git = "https://github.com/brocolis/dynload-base.git" }
+
+[install]
+library = false
