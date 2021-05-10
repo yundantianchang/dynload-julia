@@ -3,7 +3,7 @@ use dynload_base, only: dynload_init, dynload_get, dynload_get_pointer, dynload_
 use, intrinsic :: iso_c_binding, only: c_ptr, c_char, c_int, c_null_ptr, c_null_char, c_associated, c_f_procpointer, &
     c_funptr, jl_value_t => c_ptr, jl_sym_t => c_ptr, jl_module_t => c_ptr, &
     c_float, c_double, c_int8_t, c_int16_t, c_int32_t, c_int64_t, jl_datatype_t => c_ptr, c_f_pointer, &
-    jl_typename_t => c_ptr
+    jl_typename_t => c_ptr, c_size_t, jl_array_t => c_ptr
 implicit none
 
 abstract interface
@@ -99,6 +99,37 @@ abstract interface
         integer(kind=c_int) :: r
     end function
 
+    function interface_jl_apply_array_type(type, dim) result(r) bind(c)
+        import c_size_t, jl_value_t
+        type(jl_value_t), intent(in), value :: type
+        integer(kind=c_size_t), intent(in), value :: dim
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_alloc_array_1d(atype, nr) result(r) bind(c)
+        import jl_value_t, c_size_t, jl_array_t
+        type(jl_value_t), intent(in), value :: atype
+        integer(kind=c_size_t), intent(in), value :: nr
+        type(jl_array_t) :: r
+    end function
+
+    function interface_jl_alloc_array_2d(atype, nr, nc) result(r) bind(c)
+        import jl_value_t, c_size_t, jl_array_t
+        type(jl_value_t), intent(in), value :: atype
+        integer(kind=c_size_t), intent(in), value :: nr
+        integer(kind=c_size_t), intent(in), value :: nc
+        type(jl_array_t) :: r
+    end function
+
+    function interface_jl_alloc_array_3d(atype, nr, nc, z) result(r) bind(c)
+        import jl_value_t, c_size_t, jl_array_t
+        type(jl_value_t), intent(in), value :: atype
+        integer(kind=c_size_t), intent(in), value :: nr
+        integer(kind=c_size_t), intent(in), value :: nc
+        integer(kind=c_size_t), intent(in), value :: z
+        type(jl_array_t) :: r
+    end function
+
 end interface
 
 private :: julia_module_handle, to_c_string
@@ -121,6 +152,10 @@ procedure(interface_jl_unbox_int32), bind(c), public, pointer :: jl_unbox_int32 
 procedure(interface_jl_unbox_int64), bind(c), public, pointer :: jl_unbox_int64 => null()
 procedure(interface_jl_gc_enable), bind(c), public, pointer :: jl_gc_enable => null()
 procedure(interface_jl_gc_is_enabled), bind(c), public, pointer :: jl_gc_is_enabled => null()
+procedure(interface_jl_apply_array_type), bind(c), public, pointer :: jl_apply_array_type => null()
+procedure(interface_jl_alloc_array_1d), bind(c), public, pointer :: jl_alloc_array_1d => null()
+procedure(interface_jl_alloc_array_2d), bind(c), public, pointer :: jl_alloc_array_2d => null()
+procedure(interface_jl_alloc_array_3d), bind(c), public, pointer :: jl_alloc_array_3d => null()
 type(jl_datatype_t), public, pointer :: jl_float16_type => null()
 type(jl_datatype_t), public, pointer :: jl_float32_type => null()
 type(jl_datatype_t), public, pointer :: jl_float64_type => null()
@@ -158,6 +193,10 @@ contains
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_unbox_int64"//c_null_char), jl_unbox_int64)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_gc_enable"//c_null_char), jl_gc_enable)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_gc_is_enabled"//c_null_char), jl_gc_is_enabled)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_apply_array_type"//c_null_char), jl_apply_array_type)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_alloc_array_1d"//c_null_char), jl_alloc_array_1d)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_alloc_array_2d"//c_null_char), jl_alloc_array_2d)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_alloc_array_3d"//c_null_char), jl_alloc_array_3d)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float16_type"//c_null_char), jl_float16_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float32_type"//c_null_char), jl_float32_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float64_type"//c_null_char), jl_float64_type)
@@ -184,6 +223,10 @@ contains
         if (.not. associated(jl_unbox_int64)) return
         if (.not. associated(jl_gc_enable)) return
         if (.not. associated(jl_gc_is_enabled)) return
+        if (.not. associated(jl_apply_array_type)) return
+        if (.not. associated(jl_alloc_array_1d)) return
+        if (.not. associated(jl_alloc_array_2d)) return
+        if (.not. associated(jl_alloc_array_3d)) return
         if (.not. associated(jl_float16_type)) return
         if (.not. associated(jl_float32_type)) return
         if (.not. associated(jl_float64_type)) return
@@ -237,6 +280,10 @@ contains
         jl_unbox_int64 => null()
         jl_gc_enable => null()
         jl_gc_is_enabled => null()
+        jl_apply_array_type => null()
+        jl_alloc_array_1d => null()
+        jl_alloc_array_2d => null()
+        jl_alloc_array_3d => null()
         jl_float16_type => null()
         jl_float32_type => null()
         jl_float64_type => null()
