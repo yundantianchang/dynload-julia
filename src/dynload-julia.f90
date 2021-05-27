@@ -292,7 +292,7 @@ contains
         if (.not. associated(jl_datatype_type)) return
         if (.not. associated(jl_array_typename)) return
 
-        ier = jl_is_initialized() .ne. 0
+        ier = 0
     end subroutine
 
     subroutine jl_init_fixup()
