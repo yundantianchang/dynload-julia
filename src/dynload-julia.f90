@@ -162,6 +162,11 @@ abstract interface
         type(jl_value_t), intent(in), value :: b
         integer(kind=c_int) :: r
     end function
+
+    function interface_jl_is_initialized() result(r) bind(c)
+        import c_int
+        integer(kind=c_int) :: r
+    end function
 end interface
 
 private :: julia_module_handle, to_c_string
@@ -193,6 +198,7 @@ procedure(interface_jl_array_eltype), bind(c), public, pointer :: jl_array_eltyp
 procedure(interface_jl_array_rank), bind(c), public, pointer :: jl_array_rank => null()
 procedure(interface_jl_array_size), bind(c), public, pointer :: jl_array_size => null()
 procedure(interface_jl_types_equal), bind(c), public, pointer :: jl_types_equal => null()
+procedure(interface_jl_is_initialized), bind(c), public, pointer :: jl_is_initialized => null()
 type(jl_datatype_t), public, pointer :: jl_float16_type => null()
 type(jl_datatype_t), public, pointer :: jl_float32_type => null()
 type(jl_datatype_t), public, pointer :: jl_float64_type => null()
@@ -239,6 +245,7 @@ contains
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_array_rank"//c_null_char), jl_array_rank)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_array_size"//c_null_char), jl_array_size)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_types_equal"//c_null_char), jl_types_equal)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_is_initialized"//c_null_char), jl_is_initialized)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float16_type"//c_null_char), jl_float16_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float32_type"//c_null_char), jl_float32_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float64_type"//c_null_char), jl_float64_type)
@@ -274,6 +281,7 @@ contains
         if (.not. associated(jl_array_rank)) return
         if (.not. associated(jl_array_size)) return
         if (.not. associated(jl_types_equal)) return
+        if (.not. associated(jl_is_initialized)) return
         if (.not. associated(jl_float16_type)) return
         if (.not. associated(jl_float32_type)) return
         if (.not. associated(jl_float64_type)) return
@@ -284,7 +292,7 @@ contains
         if (.not. associated(jl_datatype_type)) return
         if (.not. associated(jl_array_typename)) return
 
-        ier = 0
+        ier = jl_is_initialized() .ne. 0
     end subroutine
 
     subroutine jl_init_fixup()
@@ -336,6 +344,7 @@ contains
         jl_array_rank => null()
         jl_array_size => null()
         jl_types_equal => null()
+        jl_is_initialized => null()
         jl_float16_type => null()
         jl_float32_type => null()
         jl_float64_type => null()
