@@ -167,6 +167,19 @@ abstract interface
         import c_int
         integer(kind=c_int) :: r
     end function
+
+    function interface_jl_current_exception() result(r) bind(c)
+        import jl_value_t
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_exception_occurred() result(r) bind(c)
+        import jl_value_t
+        type(jl_value_t) :: r
+    end function
+
+    subroutine interface_jl_exception_clear() bind(c)
+    end subroutine
 end interface
 
 private :: julia_module_handle, to_c_string
@@ -199,6 +212,9 @@ procedure(interface_jl_array_rank), bind(c), public, pointer :: jl_array_rank =>
 procedure(interface_jl_array_size), bind(c), public, pointer :: jl_array_size => null()
 procedure(interface_jl_types_equal), bind(c), public, pointer :: jl_types_equal => null()
 procedure(interface_jl_is_initialized), bind(c), public, pointer :: jl_is_initialized => null()
+procedure(interface_jl_current_exception), bind(c), public, pointer :: jl_current_exception => null()
+procedure(interface_jl_exception_occurred), bind(c), public, pointer :: jl_exception_occurred => null()
+procedure(interface_jl_exception_clear), bind(c), public, pointer :: jl_exception_clear => null()
 type(jl_datatype_t), public, pointer :: jl_float16_type => null()
 type(jl_datatype_t), public, pointer :: jl_float32_type => null()
 type(jl_datatype_t), public, pointer :: jl_float64_type => null()
@@ -246,6 +262,9 @@ contains
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_array_size"//c_null_char), jl_array_size)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_types_equal"//c_null_char), jl_types_equal)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_is_initialized"//c_null_char), jl_is_initialized)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_current_exception"//c_null_char), jl_current_exception)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_exception_occurred"//c_null_char), jl_exception_occurred)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_exception_clear"//c_null_char), jl_exception_clear)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float16_type"//c_null_char), jl_float16_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float32_type"//c_null_char), jl_float32_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float64_type"//c_null_char), jl_float64_type)
@@ -282,6 +301,9 @@ contains
         if (.not. associated(jl_array_size)) return
         if (.not. associated(jl_types_equal)) return
         if (.not. associated(jl_is_initialized)) return
+        if (.not. associated(jl_current_exception)) return
+        if (.not. associated(jl_exception_occurred)) return
+        if (.not. associated(jl_exception_clear)) return
         if (.not. associated(jl_float16_type)) return
         if (.not. associated(jl_float32_type)) return
         if (.not. associated(jl_float64_type)) return
@@ -345,6 +367,9 @@ contains
         jl_array_size => null()
         jl_types_equal => null()
         jl_is_initialized => null()
+        jl_current_exception => null()
+        jl_exception_occurred => null()
+        jl_exception_clear => null()
         jl_float16_type => null()
         jl_float32_type => null()
         jl_float64_type => null()
