@@ -15,7 +15,9 @@ if (id .eq. OS_WINDOWS) then
 else if (id .eq. OS_LINUX) then
     call load_julia("libjulia.so", ior(RTLD_LAZY, RTLD_GLOBAL), ier)
 else if (id .eq. OS_MACOS) then
-    call load_julia("/path/to/libjulia.dylib", ior(RTLD_LAZY, RTLD_GLOBAL), ier)
+    call load_julia("/Applications/Julia-1.6.app/Contents/Resources/julia/lib/libjulia.dylib", ior(RTLD_LAZY, RTLD_GLOBAL), ier)
+else
+    ier = 1
 end if
 
 if (ier .ne. 0) then
