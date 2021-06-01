@@ -29,3 +29,44 @@ fpm test
 
 ## macOS
 - Not tested
+
+## Usage
+(1) Create a new _fpm_ project and _cd_ into it
+```sh
+fpm new my-julia
+cd my-julia
+```
+(2) Open file _fpm.toml_ in your text editor and append this code:
+```toml
+[dependencies]
+dynload-julia = { git = "https://github.com/brocolis/dynload-julia.git" }
+```
+(3) Open file _app/main.f90_ and replace everything with the following code:
+```fortran
+program main
+use julia, only: julia_init, julia_run, julia_destroy
+use, intrinsic :: iso_c_binding, only: c_double
+implicit none
+real(kind=c_double), allocatable :: matf64(:,:)
+
+call julia_init()
+call julia_run("script.jl", matf64)
+print *, 'Fortran: value computed by Julia:', matf64
+
+call julia_destroy()
+end program
+```
+(4) Create file _script.jl_ in the project root directory
+```julia
+using LinearAlgebra
+# Do stuff ...
+return [1.1 2.2; 4.4 5.5]
+```
+
+(5) Build and run the project
+```sh
+# On Linux
+fpm run --flag "-fPIC -ldl"
+# On Windows
+fpm run
+```
