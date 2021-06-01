@@ -13,7 +13,7 @@ use dynload_julia, only: load_julia, unload_julia, jl_init, jl_init_fixup, jl_at
     jl_gc_enable, jl_exception_occurred
 use dynload_base, only: RTLD_LAZY, RTLD_GLOBAL
 use os_id, only: get_os_id, OS_WINDOWS, OS_LINUX, OS_MACOS, OS_UNKNOWN
-use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_int64_t, c_double, c_null_ptr, c_associated
+use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_int64_t, c_double, c_null_ptr, c_associated, c_f_pointer, c_size_t
 
 implicit none
 private
@@ -22,7 +22,7 @@ public :: julia_init, julia_destroy, julia_run
 integer, parameter :: JULIA_OPT_DISABLE_GC = 1
 
 interface julia_run
-    module procedure julia_run_int64, julia_run_f64
+    module procedure julia_run_int64, julia_run_f64, julia_run, julia_run_vector_f64, julia_run_matrix_f64
 end interface
 
 contains
@@ -147,6 +147,79 @@ subroutine julia_run_f64(script, res)
     else
         error stop
     end if
+end subroutine
+
+subroutine julia_run(script)
+    character(len=*), intent(in) :: script
+    type(c_ptr) :: r
+    character(len=:), allocatable :: contents
+
+    call julia_load_script(script, contents)
+    r = jl_eval_string(contents)
+
+    if (c_associated(jl_exception_occurred())) then
+        print *, 'ERROR: jl_exception_occurred()'
+        error stop
+    end if
+end subroutine
+
+subroutine julia_run_vector_f64(script, res)
+    character(len=*), intent(in) :: script
+    real(kind=c_double), intent(out), allocatable :: res(:)
+    type(c_ptr) :: r
+    character(len=:), allocatable :: contents
+    integer(kind=c_size_t) :: lines
+    real(kind=c_double), pointer :: fortran_ptr(:)
+
+    call julia_load_script(script, contents)
+    r = jl_eval_string(contents)
+
+    if (c_associated(jl_exception_occurred())) then
+        print *, 'ERROR: jl_exception_occurred()'
+        error stop
+    end if
+
+    if (jl_types_equal(jl_array_ptr(jl_typeof(r)), jl_array_typename) .ne. 0 &
+        .and. jl_types_equal(jl_array_eltype(r), jl_float64_type) .ne. 0 &
+        .and. jl_array_rank(r) .eq. 1) then
+        lines = jl_array_size(r, 0)
+        allocate(res(lines))
+        call c_f_pointer(jl_array_ptr(r), fortran_ptr, shape=[lines])
+        res = fortran_ptr
+    else
+        print *, 'ERROR: The value returned from Julia is not a Vector{Float64}'
+        error stop
+    end if
+end subroutine
+
+subroutine julia_run_matrix_f64(script, res)
+    character(len=*), intent(in) :: script
+    real(kind=c_double), intent(out), allocatable :: res(:,:)
+    type(c_ptr) :: r
+    character(len=:), allocatable :: contents
+    integer(kind=c_size_t) :: lines, columns
+    real(kind=c_double), pointer :: fortran_ptr(:,:)
+
+    call julia_load_script(script, contents)
+    r = jl_eval_string(contents)
+
+    if (c_associated(jl_exception_occurred())) then
+        print *, 'ERROR: jl_exception_occurred()'
+        error stop
+    end if
+
+    if (jl_types_equal(jl_array_ptr(jl_typeof(r)), jl_array_typename) .ne. 0 &
+        .and. jl_types_equal(jl_array_eltype(r), jl_float64_type) .ne. 0 &
+        .and. jl_array_rank(r) .eq. 2) then
+        lines = jl_array_size(r, 0)
+        columns = jl_array_size(r, 1)
+        allocate(res(lines, columns))
+        call c_f_pointer(jl_array_ptr(r), fortran_ptr, shape=[lines, columns])
+        res = transpose(fortran_ptr)
+    else
+        print *, 'ERROR: The value returned from Julia is not a Matrix{Float64}'
+        error stop
+     end if
 end subroutine
 
 end module julia
