@@ -11,7 +11,7 @@ call julia_init(ier=ier)
 
 if (ier .ne. 0) then
     print *, 'Bye...'
-    return
+    stop
 end if
 
 ! Run a julia script.jl and read the return value as a Int64 (c_int64_t in Fortran)

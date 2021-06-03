@@ -23,7 +23,7 @@ end if
 
 if (ier .ne. 0) then
     print *, 'Cannot load julia'
-    return
+    stop
 end if
 
 call jl_init()
