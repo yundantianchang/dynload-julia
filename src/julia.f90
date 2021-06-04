@@ -79,7 +79,7 @@ subroutine julia_init(lib, flags, options, ier)
     end if
 
     call jl_init()
-    call jl_init_fixup()
+    !call jl_init_fixup()
 
     if (btest(moptions, 0)) then
         i = jl_gc_enable(0)
