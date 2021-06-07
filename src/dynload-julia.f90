@@ -270,6 +270,7 @@ type(jl_datatype_t), public, pointer :: jl_int32_type => null()
 type(jl_datatype_t), public, pointer :: jl_int64_type => null()
 type(jl_datatype_t), public, pointer :: jl_datatype_type => null()
 type(jl_typename_t), public, pointer :: jl_array_typename => null()
+type(jl_datatype_t), public, pointer :: jl_string_type => null()
 
 contains
     subroutine load_julia(julia_dll, flags, ier)
@@ -327,6 +328,7 @@ contains
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_int64_type"//c_null_char), jl_int64_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_datatype_type"//c_null_char), jl_datatype_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_array_typename"//c_null_char), jl_array_typename)
+        call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_string_type"//c_null_char), jl_string_type)
 
         if (.not. associated(jl_init)) return
         if (.not. associated(real_jl_eval_string)) return
@@ -373,6 +375,7 @@ contains
         if (.not. associated(jl_int64_type)) return
         if (.not. associated(jl_datatype_type)) return
         if (.not. associated(jl_array_typename)) return
+        if (.not. associated(jl_string_type)) return
 
         ier = 0
     end subroutine
@@ -446,6 +449,7 @@ contains
         jl_int64_type => null()
         jl_datatype_type => null()
         jl_array_typename => null()
+        jl_string_type => null()
 
         call dynload_destroy(julia_module_handle)
     end subroutine
