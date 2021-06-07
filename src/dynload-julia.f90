@@ -1,5 +1,6 @@
 module dynload_julia
 use dynload_base, only: dynload_init, dynload_get, dynload_get_pointer, dynload_destroy
+use c_util, only: to_c_string
 use, intrinsic :: iso_c_binding, only: c_ptr, c_char, c_int, c_null_ptr, c_null_char, c_associated, c_f_procpointer, &
     c_funptr, jl_value_t => c_ptr, jl_sym_t => c_ptr, jl_module_t => c_ptr, &
     c_float, c_double, c_int8_t, c_int16_t, c_int32_t, c_int64_t, jl_datatype_t => c_ptr, c_f_pointer, &
@@ -220,7 +221,7 @@ abstract interface
     end function
 end interface
 
-private :: julia_module_handle, to_c_string
+private :: julia_module_handle
 type(c_ptr) :: julia_module_handle
 
 public :: load_julia, unload_julia
@@ -455,11 +456,4 @@ contains
 
         r = real_jl_eval_string(to_c_string(str))
     end function
-
-    function to_c_string(f) result(c)
-        character(len=*), intent(in) :: f
-        character(len=:,kind=c_char), allocatable :: c
-        c = f(1:len_trim(f)) // c_null_char
-    end function
-
 end module
