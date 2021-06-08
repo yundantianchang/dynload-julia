@@ -127,6 +127,7 @@ subroutine julia_run_int64(script, res)
     if (jl_types_equal(jl_typeof(r), jl_int64_type) .ne. 0) then
         res = jl_unbox_int64(r)
     else
+        print *, 'ERROR: The value returned from Julia is not an Int64'
         error stop
     end if
 end subroutine
@@ -148,6 +149,7 @@ subroutine julia_run_f64(script, res)
     if (jl_types_equal(jl_typeof(r), jl_float64_type) .ne. 0) then
         res = jl_unbox_float64(r)
     else
+        print *, 'ERROR: The value returned from Julia is not a Float64'
         error stop
     end if
 end subroutine
