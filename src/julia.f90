@@ -169,6 +169,7 @@ subroutine julia_run_string(script, res)
     if (jl_types_equal(jl_typeof(r), jl_string_type) .ne. 0) then
         res = to_fortran_string(jl_string_ptr(r))
     else
+        print *, 'ERROR: The value returned from Julia is not a String'
         error stop
     end if
 end subroutine
