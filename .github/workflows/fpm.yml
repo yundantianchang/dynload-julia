@@ -1,0 +1,31 @@
+name: fpm
+
+on: [push, pull_request]
+
+jobs:
+  gfortran:
+    runs-on: windows-latest
+
+    env:
+      FC: gfortran
+      GCC_V: 10
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v1
+
+    - name: Install fpm
+      uses: fortran-lang/setup-fpm@v3
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Install Julia
+      uses: julia-actions/setup-julia@v1
+      with:
+          version: '1.6'
+
+    - name: Run tests
+      run: |
+        gfortran --version
+        julia --version
+        fpm test
