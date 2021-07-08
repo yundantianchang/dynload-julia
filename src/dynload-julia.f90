@@ -380,28 +380,6 @@ contains
         ier = 0
     end subroutine
 
-    subroutine jl_init_fixup()
-        call c_f_pointer(transfer(&
-            dynload_get_pointer(julia_module_handle, "jl_float16_type"//c_null_char), c_null_ptr), jl_float16_type)
-        call c_f_pointer(transfer(&
-            dynload_get_pointer(julia_module_handle, "jl_float32_type"//c_null_char), c_null_ptr), jl_float32_type)
-        call c_f_pointer(transfer(&
-            dynload_get_pointer(julia_module_handle, "jl_float64_type"//c_null_char), c_null_ptr), jl_float64_type)
-
-        call c_f_pointer(transfer(&
-            dynload_get_pointer(julia_module_handle, "jl_int8_type"//c_null_char), c_null_ptr), jl_int8_type)
-        call c_f_pointer(transfer(&
-            dynload_get_pointer(julia_module_handle, "jl_int16_type"//c_null_char), c_null_ptr), jl_int16_type)
-        call c_f_pointer(transfer(&
-            dynload_get_pointer(julia_module_handle, "jl_int32_type"//c_null_char), c_null_ptr), jl_int32_type)
-        call c_f_pointer(transfer(&
-            dynload_get_pointer(julia_module_handle, "jl_int64_type"//c_null_char), c_null_ptr), jl_int64_type)
-        call c_f_pointer(transfer(&
-            dynload_get_pointer(julia_module_handle, "jl_datatype_type"//c_null_char), c_null_ptr), jl_datatype_type)
-        call c_f_pointer(transfer(&
-            dynload_get_pointer(julia_module_handle, "jl_array_typename"//c_null_char), c_null_ptr), jl_array_typename)
-    end subroutine
-
     subroutine unload_julia()
         ! Invalidate pointers
         jl_init => null()

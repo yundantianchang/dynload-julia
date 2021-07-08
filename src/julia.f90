@@ -4,7 +4,7 @@ module julia
 ! Status: experimental
 !
 
-use dynload_julia, only: load_julia, unload_julia, jl_init, jl_init_fixup, jl_atexit_hook, &
+use dynload_julia, only: load_julia, unload_julia, jl_init, jl_atexit_hook, &
     jl_eval_string, &
     jl_types_equal, jl_typeof, jl_datatype_type, &
     jl_int64_type, jl_float64_type, jl_string_type, &
@@ -82,7 +82,6 @@ subroutine julia_init(lib, flags, options, ier)
     end if
 
     call jl_init()
-    !call jl_init_fixup()
 
     if (btest(moptions, 0)) then
         i = jl_gc_enable(0)
