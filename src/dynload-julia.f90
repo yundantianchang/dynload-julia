@@ -267,6 +267,9 @@ abstract interface
         type(jl_value_t), intent(in), value :: c
         type(jl_value_t) :: r
     end function
+
+    subroutine interface_jl_flush_cstdio() bind(c)
+    end subroutine
 end interface
 
 private :: julia_module_handle
@@ -316,6 +319,7 @@ procedure(interface_jl_call0), bind(c), public, pointer :: jl_call0 => null()
 procedure(interface_jl_call1), bind(c), public, pointer :: jl_call1 => null()
 procedure(interface_jl_call2), bind(c), public, pointer :: jl_call2 => null()
 procedure(interface_jl_call3), bind(c), public, pointer :: jl_call3 => null()
+procedure(interface_jl_flush_cstdio), bind(c), public, pointer :: jl_flush_cstdio => null()
 type(jl_datatype_t), public, pointer :: jl_float16_type => null()
 type(jl_datatype_t), public, pointer :: jl_float32_type => null()
 type(jl_datatype_t), public, pointer :: jl_float64_type => null()
@@ -385,6 +389,7 @@ contains
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_call1"//c_null_char), jl_call1)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_call2"//c_null_char), jl_call2)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_call3"//c_null_char), jl_call3)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_flush_cstdio"//c_null_char), jl_flush_cstdio)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float16_type"//c_null_char), jl_float16_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float32_type"//c_null_char), jl_float32_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float64_type"//c_null_char), jl_float64_type)
@@ -443,6 +448,7 @@ contains
         if (.not. associated(jl_call1)) return
         if (.not. associated(jl_call2)) return
         if (.not. associated(jl_call3)) return
+        if (.not. associated(jl_flush_cstdio)) return
         if (.not. associated(jl_float16_type)) return
         if (.not. associated(jl_float32_type)) return
         if (.not. associated(jl_float64_type)) return
@@ -506,6 +512,7 @@ contains
         jl_call1 => null()
         jl_call2 => null()
         jl_call3 => null()
+        jl_flush_cstdio => null()
         jl_float16_type => null()
         jl_float32_type => null()
         jl_float64_type => null()
