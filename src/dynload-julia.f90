@@ -219,6 +219,16 @@ abstract interface
         type(jl_value_t), intent(in), value :: v
         type(c_ptr) :: r
     end function
+
+    function interface_jl_stdout_obj() result(r) bind(c)
+        import jl_value_t
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_stderr_obj() result(r) bind(c)
+        import jl_value_t
+        type(jl_value_t) :: r
+    end function
 end interface
 
 private :: julia_module_handle
@@ -261,6 +271,8 @@ procedure(interface_jl_ver_is_release), bind(c), public, pointer :: jl_ver_is_re
 procedure(interface_jl_typeof_str), bind(c), public, pointer :: jl_typeof_str => null()
 procedure(interface_jl_string_ptr), bind(c), public, pointer :: jl_string_ptr => null()
 procedure(interface_jl_typename_str), bind(c), public, pointer :: jl_typename_str => null()
+procedure(interface_jl_stdout_obj), bind(c), public, pointer :: jl_stdout_obj => null()
+procedure(interface_jl_stderr_obj), bind(c), public, pointer :: jl_stderr_obj => null()
 type(jl_datatype_t), public, pointer :: jl_float16_type => null()
 type(jl_datatype_t), public, pointer :: jl_float32_type => null()
 type(jl_datatype_t), public, pointer :: jl_float64_type => null()
@@ -319,6 +331,8 @@ contains
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_typeof_str"//c_null_char), jl_typeof_str)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_string_ptr"//c_null_char), jl_string_ptr)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_typename_str"//c_null_char), jl_typename_str)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_stdout_obj"//c_null_char), jl_stdout_obj)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_stderr_obj"//c_null_char), jl_stderr_obj)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float16_type"//c_null_char), jl_float16_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float32_type"//c_null_char), jl_float32_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float64_type"//c_null_char), jl_float64_type)
@@ -366,6 +380,8 @@ contains
         if (.not. associated(jl_typeof_str)) return
         if (.not. associated(jl_string_ptr)) return
         if (.not. associated(jl_typename_str)) return
+        if (.not. associated(jl_stdout_obj)) return
+        if (.not. associated(jl_stderr_obj)) return
         if (.not. associated(jl_float16_type)) return
         if (.not. associated(jl_float32_type)) return
         if (.not. associated(jl_float64_type)) return
@@ -418,6 +434,8 @@ contains
         jl_typeof_str => null()
         jl_string_ptr => null()
         jl_typename_str => null()
+        jl_stdout_obj => null()
+        jl_stderr_obj => null()
         jl_float16_type => null()
         jl_float32_type => null()
         jl_float64_type => null()
