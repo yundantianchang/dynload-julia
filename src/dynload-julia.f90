@@ -229,6 +229,44 @@ abstract interface
         import jl_value_t
         type(jl_value_t) :: r
     end function
+
+    function interface_jl_call(f, args, nargs) result(r) bind(c)
+        import jl_function_t, jl_value_t, c_int32_t
+        type(jl_function_t), intent(in), value :: f
+        type(jl_value_t), intent(in) :: args
+        integer(kind=c_int32_t), intent(in), value :: nargs
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_call0(f) result(r) bind(c)
+        import jl_function_t, jl_value_t
+        type(jl_function_t), intent(in), value :: f
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_call1(f, a) result(r) bind(c)
+        import jl_function_t, jl_value_t
+        type(jl_function_t), intent(in), value :: f
+        type(jl_value_t), intent(in), value :: a
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_call2(f, a, b) result(r) bind(c)
+        import jl_function_t, jl_value_t
+        type(jl_function_t), intent(in), value :: f
+        type(jl_value_t), intent(in), value :: a
+        type(jl_value_t), intent(in), value :: b
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_call3(f, a, b, c) result(r) bind(c)
+        import jl_function_t, jl_value_t
+        type(jl_function_t), intent(in), value :: f
+        type(jl_value_t), intent(in), value :: a
+        type(jl_value_t), intent(in), value :: b
+        type(jl_value_t), intent(in), value :: c
+        type(jl_value_t) :: r
+    end function
 end interface
 
 private :: julia_module_handle
@@ -273,6 +311,11 @@ procedure(interface_jl_string_ptr), bind(c), public, pointer :: jl_string_ptr =>
 procedure(interface_jl_typename_str), bind(c), public, pointer :: jl_typename_str => null()
 procedure(interface_jl_stdout_obj), bind(c), public, pointer :: jl_stdout_obj => null()
 procedure(interface_jl_stderr_obj), bind(c), public, pointer :: jl_stderr_obj => null()
+procedure(interface_jl_call), bind(c), public, pointer :: jl_call => null()
+procedure(interface_jl_call0), bind(c), public, pointer :: jl_call0 => null()
+procedure(interface_jl_call1), bind(c), public, pointer :: jl_call1 => null()
+procedure(interface_jl_call2), bind(c), public, pointer :: jl_call2 => null()
+procedure(interface_jl_call3), bind(c), public, pointer :: jl_call3 => null()
 type(jl_datatype_t), public, pointer :: jl_float16_type => null()
 type(jl_datatype_t), public, pointer :: jl_float32_type => null()
 type(jl_datatype_t), public, pointer :: jl_float64_type => null()
@@ -333,6 +376,11 @@ contains
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_typename_str"//c_null_char), jl_typename_str)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_stdout_obj"//c_null_char), jl_stdout_obj)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_stderr_obj"//c_null_char), jl_stderr_obj)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_call"//c_null_char), jl_call)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_call0"//c_null_char), jl_call0)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_call1"//c_null_char), jl_call1)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_call2"//c_null_char), jl_call2)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_call3"//c_null_char), jl_call3)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float16_type"//c_null_char), jl_float16_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float32_type"//c_null_char), jl_float32_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float64_type"//c_null_char), jl_float64_type)
@@ -382,6 +430,11 @@ contains
         if (.not. associated(jl_typename_str)) return
         if (.not. associated(jl_stdout_obj)) return
         if (.not. associated(jl_stderr_obj)) return
+        if (.not. associated(jl_call)) return
+        if (.not. associated(jl_call0)) return
+        if (.not. associated(jl_call1)) return
+        if (.not. associated(jl_call2)) return
+        if (.not. associated(jl_call3)) return
         if (.not. associated(jl_float16_type)) return
         if (.not. associated(jl_float32_type)) return
         if (.not. associated(jl_float64_type)) return
@@ -436,6 +489,11 @@ contains
         jl_typename_str => null()
         jl_stdout_obj => null()
         jl_stderr_obj => null()
+        jl_call => null()
+        jl_call0 => null()
+        jl_call1 => null()
+        jl_call2 => null()
+        jl_call3 => null()
         jl_float16_type => null()
         jl_float32_type => null()
         jl_float64_type => null()
