@@ -4,7 +4,7 @@ use c_util, only: to_c_string
 use, intrinsic :: iso_c_binding, only: c_ptr, c_char, c_int, c_null_ptr, c_null_char, c_associated, c_f_procpointer, &
     c_funptr, jl_value_t => c_ptr, jl_sym_t => c_ptr, jl_module_t => c_ptr, &
     c_float, c_double, c_int8_t, c_int16_t, c_int32_t, c_int64_t, jl_datatype_t => c_ptr, c_f_pointer, &
-    jl_typename_t => c_ptr, c_size_t, jl_array_t => c_ptr
+    jl_typename_t => c_ptr, c_size_t, jl_array_t => c_ptr, jl_function_t => c_ptr
 
 implicit none
 
@@ -437,5 +437,13 @@ contains
         type(c_ptr) :: r
 
         r = real_jl_eval_string(to_c_string(str))
+    end function
+
+    function jl_get_function(m, name) result(r)
+        type(jl_module_t), intent(in), value :: m
+        character(len=*,kind=c_char), intent(in) :: name
+        type(jl_function_t) :: r
+
+        r = jl_get_global(m, jl_symbol(to_c_string(name)))
     end function
 end module
