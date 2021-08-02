@@ -14,6 +14,10 @@ auto-executables = true
 auto-tests = true
 auto-examples = true
 
+# Some linux distros don't work with `--flag -ldl`
+# If that is the case, uncomment the following line
+# link = "dl"
+
 [dependencies]
 dynload-base = { git = "https://github.com/brocolis/dynload-base.git" }
 os-id = { git = "https://github.com/brocolis/os-id.git" }
