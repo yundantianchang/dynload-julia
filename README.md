@@ -36,6 +36,13 @@ cd my-julia
 [dependencies]
 dynload-julia = { git = "https://github.com/brocolis/dynload-julia.git" }
 ```
+
+(2.1) If your computer runs linux, add `link = "dl"` to the `[build]` section of  _fpm.toml_
+```toml
+[build]
+link = "dl"
+```
+
 (3) Open file _app/main.f90_ and replace everything with the following code:
 ```fortran
 program main
@@ -60,8 +67,6 @@ return [1.1 2.2; 4.4 5.5]
 
 (5) Build and run the project
 ```sh
-# On Linux
-fpm run --flag "-fPIC -ldl"
 # On Windows
 fpm run
 ```
