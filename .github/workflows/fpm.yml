@@ -42,14 +42,17 @@ jobs:
       with:
           version: '1.6'
 
-    - name: Fix fpm.toml
+    - name: Run tests (Ubuntu)
       if: contains(matrix.os, 'ubuntu')
       run: |
+        gfortran --version
+        julia --version
         sed -i "s/^# link/link/" fpm.toml
+        export LD_LIBRARY_PATH=$(dirname $(which julia))/../lib
+        fpm test
 
     - name: Run tests
       run: |
         gfortran --version
         julia --version
-        export LD_LIBRARY_PATH=$(dirname $(which julia))/../lib
         fpm test
