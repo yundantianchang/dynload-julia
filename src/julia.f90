@@ -11,7 +11,8 @@ use dynload_julia, only: load_julia, unload_julia, jl_init, jl_atexit_hook, &
     jl_array_typename, jl_array_ptr, jl_array_eltype, jl_array_rank, jl_array_size, &
     jl_unbox_int64, jl_unbox_float64, &
     jl_gc_enable, jl_exception_occurred, jl_current_exception, &
-    jl_string_ptr, jl_typeof_str
+    jl_string_ptr, jl_typeof_str, &
+    jl_base_module, jl_get_function, jl_stderr_obj, jl_call2
 use dynload_base, only: RTLD_LAZY, RTLD_GLOBAL
 use os_id, only: get_os_id, OS_WINDOWS, OS_LINUX, OS_MACOS, OS_UNKNOWN
 use, intrinsic :: iso_c_binding, only: c_ptr, c_int, c_int64_t, c_double, c_null_ptr, c_associated, c_f_pointer, c_size_t, &
@@ -118,10 +119,7 @@ subroutine julia_run_int64(script, res)
     call julia_load_script(script, contents)
     r = jl_eval_string(contents)
 
-    if (c_associated(jl_exception_occurred())) then
-        print *, 'ERROR: jl_exception_occurred()'
-        error stop
-    end if
+    call check_julia_exception()
 
     if (jl_types_equal(jl_typeof(r), jl_int64_type) .ne. 0) then
         res = jl_unbox_int64(r)
@@ -140,10 +138,7 @@ subroutine julia_run_f64(script, res)
     call julia_load_script(script, contents)
     r = jl_eval_string(contents)
 
-    if (c_associated(jl_exception_occurred())) then
-        print *, 'ERROR: jl_exception_occurred()'
-        error stop
-    end if
+    call check_julia_exception()
 
     if (jl_types_equal(jl_typeof(r), jl_float64_type) .ne. 0) then
         res = jl_unbox_float64(r)
@@ -162,10 +157,7 @@ subroutine julia_run_string(script, res)
     call julia_load_script(script, contents)
     r = jl_eval_string(contents)
 
-    if (c_associated(jl_exception_occurred())) then
-        print *, 'ERROR: jl_exception_occurred()'
-        error stop
-    end if
+    call check_julia_exception()
 
     if (jl_types_equal(jl_typeof(r), jl_string_type) .ne. 0) then
         res = to_fortran_string(jl_string_ptr(r))
@@ -182,11 +174,7 @@ subroutine julia_run(script)
 
     call julia_load_script(script, contents)
     r = jl_eval_string(contents)
-
-    if (c_associated(jl_exception_occurred())) then
-        print *, 'ERROR: jl_exception_occurred()'
-        error stop
-    end if
+    call check_julia_exception()
 end subroutine
 
 subroutine julia_run_vector_f64(script, res)
@@ -200,10 +188,7 @@ subroutine julia_run_vector_f64(script, res)
     call julia_load_script(script, contents)
     r = jl_eval_string(contents)
 
-    if (c_associated(jl_exception_occurred())) then
-        print *, 'ERROR: jl_exception_occurred()'
-        error stop
-    end if
+    call check_julia_exception()
 
     if (jl_types_equal(jl_array_ptr(jl_typeof(r)), jl_array_typename) .ne. 0 &
         .and. jl_types_equal(jl_array_eltype(r), jl_float64_type) .ne. 0 &
@@ -229,10 +214,7 @@ subroutine julia_run_matrix_f64(script, res)
     call julia_load_script(script, contents)
     r = jl_eval_string(contents)
 
-    if (c_associated(jl_exception_occurred())) then
-        print *, 'ERROR: jl_exception_occurred()'
-        error stop
-    end if
+    call check_julia_exception()
 
     if (jl_types_equal(jl_array_ptr(jl_typeof(r)), jl_array_typename) .ne. 0 &
         .and. jl_types_equal(jl_array_eltype(r), jl_float64_type) .ne. 0 &
@@ -246,6 +228,16 @@ subroutine julia_run_matrix_f64(script, res)
         print *, 'ERROR: The value returned from Julia is not a Matrix{Float64}'
         error stop
      end if
+end subroutine
+
+subroutine check_julia_exception()
+    type(c_ptr) :: r
+
+    if (c_associated(jl_exception_occurred())) then
+        r = jl_call2(jl_get_function(jl_base_module, "showerror"), jl_stderr_obj(), jl_exception_occurred())
+        print *, new_line('A')
+        error stop
+    end if
 end subroutine
 
 end module julia
