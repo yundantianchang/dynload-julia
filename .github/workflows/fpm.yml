@@ -51,4 +51,5 @@ jobs:
       run: |
         gfortran --version
         julia --version
+        export LD_LIBRARY_PATH=$(dirname $(which julia))/../lib
         fpm test
