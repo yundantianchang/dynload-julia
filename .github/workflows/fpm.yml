@@ -51,7 +51,8 @@ jobs:
         export LD_LIBRARY_PATH=$(dirname $(which julia))/../lib
         fpm test
 
-    - name: Run tests
+    - name: Run tests (Windows)
+      if: contains(matrix.os, 'windows')
       run: |
         gfortran --version
         julia --version
