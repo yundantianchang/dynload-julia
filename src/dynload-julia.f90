@@ -157,6 +157,24 @@ abstract interface
         integer(kind=c_size_t) :: r
     end function
 
+    function interface_jl_ptr_to_array_1d(atype, data, nel, own_buffer) result(r) bind(c)
+        import jl_value_t, c_ptr, c_size_t, c_int, jl_array_t
+        type(jl_value_t), intent(in), value :: atype
+        type(c_ptr), intent(in), value :: data
+        integer(kind=c_size_t), intent(in), value :: nel
+        integer(kind=c_int), intent(in), value :: own_buffer
+        type(jl_array_t) :: r
+    end function
+
+    function interface_jl_ptr_to_array(atype, data, dims, own_buffer) result(r) bind(c)
+        import jl_value_t, c_ptr, c_int, jl_array_t
+        type(jl_value_t), intent(in), value :: atype
+        type(c_ptr), intent(in), value :: data
+        type(jl_value_t), intent(in), value :: dims
+        integer(kind=c_int), intent(in), value :: own_buffer
+        type(jl_array_t) :: r
+    end function
+
     function interface_jl_types_equal(a, b) result(r) bind(c)
         import jl_value_t, c_int
         type(jl_value_t), intent(in), value :: a
@@ -300,6 +318,8 @@ procedure(interface_jl_array_ptr), bind(c), public, pointer :: jl_array_ptr => n
 procedure(interface_jl_array_eltype), bind(c), public, pointer :: jl_array_eltype => null()
 procedure(interface_jl_array_rank), bind(c), public, pointer :: jl_array_rank => null()
 procedure(interface_jl_array_size), bind(c), public, pointer :: jl_array_size => null()
+procedure(interface_jl_ptr_to_array_1d), bind(c), public, pointer :: jl_ptr_to_array_1d => null()
+procedure(interface_jl_ptr_to_array), bind(c), public, pointer :: jl_ptr_to_array => null()
 procedure(interface_jl_types_equal), bind(c), public, pointer :: jl_types_equal => null()
 procedure(interface_jl_is_initialized), bind(c), public, pointer :: jl_is_initialized => null()
 procedure(interface_jl_current_exception), bind(c), public, pointer :: jl_current_exception => null()
@@ -370,6 +390,8 @@ contains
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_array_eltype"//c_null_char), jl_array_eltype)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_array_rank"//c_null_char), jl_array_rank)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_array_size"//c_null_char), jl_array_size)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_ptr_to_array_1d"//c_null_char), jl_ptr_to_array_1d)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_ptr_to_array"//c_null_char), jl_ptr_to_array)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_types_equal"//c_null_char), jl_types_equal)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_is_initialized"//c_null_char), jl_is_initialized)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_current_exception"//c_null_char), jl_current_exception)
@@ -429,6 +451,8 @@ contains
         if (.not. associated(jl_array_eltype)) return
         if (.not. associated(jl_array_rank)) return
         if (.not. associated(jl_array_size)) return
+        if (.not. associated(jl_ptr_to_array_1d)) return
+        if (.not. associated(jl_ptr_to_array)) return
         if (.not. associated(jl_types_equal)) return
         if (.not. associated(jl_is_initialized)) return
         if (.not. associated(jl_current_exception)) return
@@ -493,6 +517,8 @@ contains
         jl_array_eltype => null()
         jl_array_rank => null()
         jl_array_size => null()
+        jl_ptr_to_array_1d => null()
+        jl_ptr_to_array => null()
         jl_types_equal => null()
         jl_is_initialized => null()
         jl_current_exception => null()
