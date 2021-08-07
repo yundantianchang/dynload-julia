@@ -67,6 +67,5 @@ return [1.1 2.2; 4.4 5.5]
 
 (5) Build and run the project
 ```sh
-# On Windows
 fpm run
 ```
