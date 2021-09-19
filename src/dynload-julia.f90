@@ -294,6 +294,55 @@ abstract interface
 
     subroutine interface_jl_flush_cstdio() bind(c)
     end subroutine
+
+    function interface_jl_box_bool(x) result(r) bind(c)
+        import c_int8_t, jl_value_t
+        integer(kind=c_int8_t), intent(in), value :: x
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_box_int8(x) result(r) bind(c)
+        import c_int8_t, jl_value_t
+        integer(kind=c_int8_t), intent(in), value :: x
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_box_int16(x) result(r) bind(c)
+        import c_int16_t, jl_value_t
+        integer(kind=c_int16_t), intent(in), value :: x
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_box_int32(x) result(r) bind(c)
+        import c_int32_t, jl_value_t
+        integer(kind=c_int32_t), intent(in), value :: x
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_box_int64(x) result(r) bind(c)
+        import c_int64_t, jl_value_t
+        integer(kind=c_int64_t), intent(in), value :: x
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_box_float32(x) result(r) bind(c)
+        import c_float, jl_value_t
+        real(kind=c_float), intent(in), value :: x
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_box_float64(x) result(r) bind(c)
+        import c_double, jl_value_t
+        real(kind=c_double), intent(in), value :: x
+        type(jl_value_t) :: r
+    end function
+
+    function interface_jl_box_voidpointer(x) result(r) bind(c)
+        import c_ptr, jl_value_t
+        type(c_ptr), intent(in), value :: x
+        type(jl_value_t) :: r
+    end function
+
 end interface
 
 private :: julia_module_handle
@@ -307,6 +356,14 @@ procedure(interface_jl_typeof), bind(c), public, pointer :: jl_typeof => null()
 procedure(interface_jl_symbol), bind(c), public, pointer :: jl_symbol => null()
 procedure(interface_jl_new_module), bind(c), public, pointer :: jl_new_module => null()
 procedure(interface_jl_get_global), bind(c), public, pointer :: jl_get_global => null()
+procedure(interface_jl_box_bool), bind(c), public, pointer :: jl_box_bool => null()
+procedure(interface_jl_box_int8), bind(c), public, pointer :: jl_box_int8 => null()
+procedure(interface_jl_box_int16), bind(c), public, pointer :: jl_box_int16 => null()
+procedure(interface_jl_box_int32), bind(c), public, pointer :: jl_box_int32 => null()
+procedure(interface_jl_box_int64), bind(c), public, pointer :: jl_box_int64 => null()
+procedure(interface_jl_box_float32), bind(c), public, pointer :: jl_box_float32 => null()
+procedure(interface_jl_box_float64), bind(c), public, pointer :: jl_box_float64 => null()
+procedure(interface_jl_box_voidpointer), bind(c), public, pointer :: jl_box_voidpointer => null()
 procedure(interface_jl_unbox_float32), bind(c), public, pointer :: jl_unbox_float32 => null()
 procedure(interface_jl_unbox_float64), bind(c), public, pointer :: jl_unbox_float64 => null()
 procedure(interface_jl_unbox_bool), bind(c), public, pointer :: jl_unbox_bool => null()
@@ -380,6 +437,14 @@ contains
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_symbol"//c_null_char), jl_symbol)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_new_module"//c_null_char), jl_new_module)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_get_global"//c_null_char), jl_get_global)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_box_bool"//c_null_char), jl_box_bool)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_box_int8"//c_null_char), jl_box_int8)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_box_int16"//c_null_char), jl_box_int16)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_box_int32"//c_null_char), jl_box_int32)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_box_int64"//c_null_char), jl_box_int64)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_box_float32"//c_null_char), jl_box_float32)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_box_float64"//c_null_char), jl_box_float64)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_box_voidpointer"//c_null_char), jl_box_voidpointer)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_unbox_float32"//c_null_char), jl_unbox_float32)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_unbox_float64"//c_null_char), jl_unbox_float64)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_unbox_bool"//c_null_char), jl_unbox_bool)
@@ -442,6 +507,14 @@ contains
         if (.not. associated(jl_symbol)) return
         if (.not. associated(jl_new_module)) return
         if (.not. associated(jl_get_global)) return
+        if (.not. associated(jl_box_bool)) return
+        if (.not. associated(jl_box_int8)) return
+        if (.not. associated(jl_box_int16)) return
+        if (.not. associated(jl_box_int32)) return
+        if (.not. associated(jl_box_int64)) return
+        if (.not. associated(jl_box_float32)) return
+        if (.not. associated(jl_box_float64)) return
+        if (.not. associated(jl_box_voidpointer)) return
         if (.not. associated(jl_unbox_float32)) return
         if (.not. associated(jl_unbox_float64)) return
         if (.not. associated(jl_unbox_bool)) return
@@ -509,6 +582,14 @@ contains
         jl_symbol => null()
         jl_new_module => null()
         jl_get_global => null()
+        jl_box_bool => null()
+        jl_box_int8 => null()
+        jl_box_int16 => null()
+        jl_box_int32 => null()
+        jl_box_int64 => null()
+        jl_box_float32 => null()
+        jl_box_float64 => null()
+        jl_box_voidpointer => null()
         jl_unbox_float32 => null()
         jl_unbox_float64 => null()
         jl_unbox_bool => null()
