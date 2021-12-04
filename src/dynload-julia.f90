@@ -350,6 +350,11 @@ abstract interface
         type(jl_value_t) :: r
     end function
 
+    function interface_jl_cpu_threads() result(r) bind(c)
+        import c_int
+        integer(kind=c_int) :: r
+    end function
+
 end interface
 
 private :: julia_module_handle
@@ -412,6 +417,7 @@ procedure(interface_jl_call2), bind(c), public, pointer :: jl_call2 => null()
 procedure(interface_jl_call3), bind(c), public, pointer :: jl_call3 => null()
 procedure(interface_jl_flush_cstdio), bind(c), public, pointer :: jl_flush_cstdio => null()
 procedure(interface_jl_load), bind(c), public, pointer :: real_jl_load => null()
+procedure(interface_jl_cpu_threads), bind(c), public, pointer :: jl_cpu_threads => null()
 type(jl_datatype_t), public, pointer :: jl_float16_type => null()
 type(jl_datatype_t), public, pointer :: jl_float32_type => null()
 type(jl_datatype_t), public, pointer :: jl_float64_type => null()
@@ -494,6 +500,7 @@ contains
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_call3"//c_null_char), jl_call3)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_flush_cstdio"//c_null_char), jl_flush_cstdio)
         call c_f_procpointer(dynload_get(julia_module_handle, "jl_load"//c_null_char), real_jl_load)
+        call c_f_procpointer(dynload_get(julia_module_handle, "jl_cpu_threads"//c_null_char), jl_cpu_threads)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float16_type"//c_null_char), jl_float16_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float32_type"//c_null_char), jl_float32_type)
         call c_f_pointer(dynload_get_pointer(julia_module_handle, "jl_float64_type"//c_null_char), jl_float64_type)
@@ -565,6 +572,7 @@ contains
         if (.not. associated(jl_call3)) return
         if (.not. associated(jl_flush_cstdio)) return
         if (.not. associated(real_jl_load)) return
+        if (.not. associated(jl_cpu_threads)) return
         if (.not. associated(jl_float16_type)) return
         if (.not. associated(jl_float32_type)) return
         if (.not. associated(jl_float64_type)) return
@@ -641,6 +649,7 @@ contains
         jl_call3 => null()
         jl_flush_cstdio => null()
         real_jl_load => null()
+        jl_cpu_threads => null()
         jl_float16_type => null()
         jl_float32_type => null()
         jl_float64_type => null()
