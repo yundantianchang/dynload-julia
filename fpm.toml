@@ -20,7 +20,6 @@ auto-examples = true
 
 [dependencies]
 dynload-base = { git = "https://github.com/brocolis/dynload-base.git" }
-os-id = { git = "https://github.com/brocolis/os-id.git" }
 c-util = { git = "https://github.com/brocolis/c-util.git" }
 
 [install]
